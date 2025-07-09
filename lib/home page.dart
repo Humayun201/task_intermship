@@ -106,13 +106,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     Colors.purple,
                     'CleverType',
                   ),
-                  _buildKeyboardOption(
-                    'System-Wide CleverType',
-                    'Use CleverType in all apps (WhatsApp, etc.)',
-                    Icons.public,
-                    Colors.green,
-                    'SystemWide',
-                  ),
                 ],
               ),
             ),
@@ -134,18 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         Navigator.pop(context);
 
-        if (type == 'SystemWide') {
-          // Show system-wide keyboard setup
-          _showSystemWideSetup();
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$title selected'),
-              backgroundColor: color,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$title selected'),
+            backgroundColor: color,
+            duration: Duration(seconds: 2),
+          ),
+        );
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12),
@@ -216,59 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             if (isSelected)
               Icon(Icons.check_circle, color: color, size: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSystemWideSetup() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Enable System-Wide Keyboard',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Use CleverType in WhatsApp, Messages, and all apps!',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  SizedBox(height: 20),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -385,75 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: 30),
 
-                    // NEW: System-Wide Keyboard Setup Card
-                    Container(
-                      margin: EdgeInsets.only(bottom: 20),
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.purple.withOpacity(0.3)),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.purple,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(Icons.public, color: Colors.white, size: 20),
-                              ),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Enable System-Wide Keyboard',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.purple,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Use CleverType in WhatsApp, Messages, and all apps!',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () => _showSystemWideSetup(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.purple,
-                                    padding: EdgeInsets.symmetric(vertical: 12),
-                                  ),
-                                  child: Text(
-                                    'Setup Now',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Settings Menu Items (simplified)
+                    // Settings Menu Items
                     _buildMenuItem(Icons.settings, 'Keyboard Settings', 'Auto Correct, Suggestions, Sound & Vibrations'),
                     _buildMenuItem(Icons.psychology, 'AI Settings', 'Custom Tones, Grammar Prompts and more', badge: 'NEW'),
                     _buildMenuItem(Icons.palette, 'Keyboard Themes', 'Day Mode, Night mode, Pure Night mode'),

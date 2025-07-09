@@ -2,22 +2,16 @@ package com.example.task_internship
 
 import android.inputmethodservice.InputMethodService
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
-import android.content.Context
-import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.graphics.Color
-import android.view.ViewGroup
 import android.widget.Button
-import android.view.Gravity
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.graphics.Color
+import android.view.Gravity
+import android.view.ViewGroup
+import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.StateListDrawable
-import android.os.Vibrator
-import android.media.AudioManager
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import org.json.JSONArray
@@ -28,7 +22,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 class CleverTypeIME : InputMethodService() {
-
     private lateinit var keyboardView: View
     private var isShiftPressed = false
     private var isNumberMode = false
@@ -64,209 +57,215 @@ class CleverTypeIME : InputMethodService() {
             )
         }
 
-        // Add keyboard header (same as Flutter version)
-        mainLayout.addView(createKeyboardHeader())
+        // Header
+        val header = createHeader()
+        mainLayout.addView(header)
 
-        // Add divider
+        // Divider
         mainLayout.addView(createDivider())
 
-        // Add AI Actions Row (same as Flutter version)
-        mainLayout.addView(createAIActionsRow())
+        // AI Actions Row
+        val aiActionsRow = createAIActionsRow()
+        mainLayout.addView(aiActionsRow)
 
-        // Add divider
+        // Divider
         mainLayout.addView(createDivider())
 
-        // Add main keyboard
-        mainLayout.addView(createMainKeyboard())
+        // Main Keyboard
+        val keyboard = createMainKeyboard()
+        mainLayout.addView(keyboard)
 
         return mainLayout
     }
 
-    private fun createKeyboardHeader(): View {
+    private fun createDivider(): View {
+        return View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                1
+            )
+            setBackgroundColor(Color.parseColor("#333333"))
+        }
+    }
+
+    private fun createHeader(): View {
         val headerLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(Color.BLACK)
-            setPadding(dpToPx(16), dpToPx(10), dpToPx(16), dpToPx(10))
+            setPadding(32, 16, 32, 16)
             gravity = Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-
-        // Left side with icon and title
-        val leftLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1f
-            )
         }
 
         // AI Icon with gradient background
-        val iconContainer = LinearLayout(this).apply {
-            setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6))
-            background = createGradientDrawable(
-                intArrayOf(Color.parseColor("#9C27B0"), Color.parseColor("#2196F3")),
-                dpToPx(8).toFloat()
-            )
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(0, 0, dpToPx(8), 0)
+        val aiIconContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(6, 6, 6, 6)
+            background = GradientDrawable().apply {
+                colors = intArrayOf(
+                    Color.parseColor("#8B5CF6"),
+                    Color.parseColor("#3B82F6")
+                )
+                cornerRadius = 8f
+                orientation = GradientDrawable.Orientation.TL_BR
             }
         }
 
-        val iconText = TextView(this).apply {
+        val aiIcon = TextView(this).apply {
             text = "✨"
             setTextColor(Color.WHITE)
             textSize = 16f
         }
-        iconContainer.addView(iconText)
+        aiIconContainer.addView(aiIcon)
 
+        // Title
         val titleText = TextView(this).apply {
             text = "CleverType AI Keyboard"
             setTextColor(Color.WHITE)
             textSize = 16f
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setPadding(16, 0, 0, 0)
         }
 
-        leftLayout.addView(iconContainer)
-        leftLayout.addView(titleText)
-
-        // Right side with settings and close buttons
-        val rightLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
+        // Spacer
+        val spacer = View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(0, 0, 1f)
         }
 
-        val settingsButton = Button(this).apply {
-            text = "⚙️"
-            setTextColor(Color.parseColor("#FFFFFF70"))
-            setBackgroundColor(Color.TRANSPARENT)
-            textSize = 20f
-            layoutParams = LinearLayout.LayoutParams(
-                dpToPx(40),
-                dpToPx(40)
-            )
-        }
-
-        val closeButton = Button(this).apply {
-            text = "⌨️"
+        // Close button
+        val closeButton = TextView(this).apply {
+            text = "⌨"
             setTextColor(Color.WHITE)
-            setBackgroundColor(Color.TRANSPARENT)
             textSize = 20f
-            layoutParams = LinearLayout.LayoutParams(
-                dpToPx(40),
-                dpToPx(40)
-            )
+            setPadding(16, 0, 0, 0)
             setOnClickListener { requestHideSelf(0) }
         }
 
-        rightLayout.addView(settingsButton)
-        rightLayout.addView(closeButton)
-
-        headerLayout.addView(leftLayout)
-        headerLayout.addView(rightLayout)
+        headerLayout.addView(aiIconContainer)
+        headerLayout.addView(titleText)
+        headerLayout.addView(spacer)
+        headerLayout.addView(closeButton)
 
         return headerLayout
-    }
-
-    private fun createDivider(): View {
-        return View(this).apply {
-            setBackgroundColor(Color.parseColor("#FF808080"))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1
-            )
-        }
     }
 
     private fun createAIActionsRow(): View {
         val aiLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(Color.BLACK)
-            setPadding(dpToPx(12), dpToPx(8), dpToPx(12), dpToPx(8))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            setPadding(12, 8, 12, 8)
         }
 
-        // Grammar Check Button
-        aiLayout.addView(createAIButton("📝", 0xFF2196F3.toInt(), "grammar"))
-        aiLayout.addView(createSpacer())
+        // Grammar Check (spellcheck icon)
+        val grammarButton = createIconOnlyAIButton("✓", "grammar", Color.parseColor("#3B82F6"))
+        aiLayout.addView(grammarButton)
 
-        // Summarize Button
-        aiLayout.addView(createAIButton("📄", 0xFF4CAF50.toInt(), "summarize"))
-        aiLayout.addView(createSpacer())
+        // Summarize (summarize icon)
+        val summarizeButton = createIconOnlyAIButton("∑", "summarize", Color.parseColor("#10B981"))
+        aiLayout.addView(summarizeButton)
 
-        // Expand Button
-        aiLayout.addView(createAIButton("📈", 0xFFFF9800.toInt(), "expand"))
-        aiLayout.addView(createSpacer())
+        // Expand (expand_more icon)
+        val expandButton = createIconOnlyAIButton("↔", "expand", Color.parseColor("#F59E0B"))
+        aiLayout.addView(expandButton)
 
-        // Translate Button
-        aiLayout.addView(createAIButton("🌐", 0xFFF44336.toInt(), "translate"))
-        aiLayout.addView(createSpacer())
+        // Translate (translate icon)
+        val translateButton = createIconOnlyAIButton("🌐", "translate", Color.parseColor("#EF4444"))
+        aiLayout.addView(translateButton)
 
-        // Gemini Button (wider)
-        aiLayout.addView(createGeminiButton())
+        // Gemini AI (with text)
+        val geminiButton = createGeminiButton()
+        aiLayout.addView(geminiButton)
 
         return aiLayout
     }
 
-    private fun createAIButton(icon: String, color: Int, action: String): Button {
+    private fun createIconOnlyAIButton(icon: String, action: String, color: Int): Button {
         return Button(this).apply {
             text = icon
+            gravity = Gravity.CENTER
             setTextColor(Color.WHITE)
-            textSize = 22f
-            background = createAIButtonBackground(color)
+            textSize = 20f
+            background = createGradientBackground(color)
             layoutParams = LinearLayout.LayoutParams(
                 0,
-                dpToPx(40),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 1f
-            )
+            ).apply {
+                setMargins(4, 0, 4, 0)
+                height = 120
+            }
             setOnClickListener { handleAIAction(action) }
+            // Add shadow effect
+            setShadowLayer(4f, 0f, 2f, color)
         }
     }
 
-    private fun createGeminiButton(): Button {
-        return Button(this).apply {
-            text = "✨ Gemini"
-            setTextColor(Color.WHITE)
-            textSize = 12f
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
-            background = createGeminiButtonBackground()
+    private fun createGeminiButton(): View {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            background = createGradientBackground(Color.parseColor("#4285F4"))
             layoutParams = LinearLayout.LayoutParams(
                 0,
-                dpToPx(40),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 2f
-            )
+            ).apply {
+                setMargins(4, 0, 4, 0)
+                height = 120
+            }
             setOnClickListener { handleAIAction("gemini") }
         }
+
+        // Gemini icon with white background
+        val geminiIcon = TextView(this).apply {
+            text = "✨"
+            setTextColor(Color.parseColor("#4285F4"))
+            textSize = 14f
+            gravity = Gravity.CENTER
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.WHITE)
+                cornerRadius = 100f
+            }
+            layoutParams = LinearLayout.LayoutParams(40, 40).apply {
+                setMargins(8, 0, 0, 0)
+            }
+        }
+
+        // Gemini text
+        val geminiText = TextView(this).apply {
+            text = "Gemini"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setPadding(8, 0, 8, 0)
+            gravity = Gravity.CENTER
+        }
+
+        container.addView(geminiIcon)
+        container.addView(geminiText)
+
+        return container
     }
 
-    private fun createSpacer(): View {
-        return View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                dpToPx(8),
-                LinearLayout.LayoutParams.MATCH_PARENT
+    private fun createGradientBackground(baseColor: Int): GradientDrawable {
+        return GradientDrawable().apply {
+            colors = intArrayOf(
+                baseColor,
+                Color.argb(
+                    200,
+                    Color.red(baseColor),
+                    Color.green(baseColor),
+                    Color.blue(baseColor)
+                )
             )
+            cornerRadius = 10f
+            orientation = GradientDrawable.Orientation.TOP_BOTTOM
+            setStroke(1, Color.parseColor("#444444"))
         }
     }
 
     private fun createMainKeyboard(): View {
         val keyboardLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.BLACK)
-            setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            setPadding(8, 8, 8, 8)
         }
 
         val currentLayout = if (isNumberMode) numberLayout else qwertyLayout
@@ -275,10 +274,10 @@ class CleverTypeIME : InputMethodService() {
             val rowLayout = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    dpToPx(50)
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
                 ).apply {
-                    setMargins(0, dpToPx(2), 0, dpToPx(2))
+                    setMargins(0, 4, 0, 4)
                 }
             }
 
@@ -294,139 +293,55 @@ class CleverTypeIME : InputMethodService() {
     }
 
     private fun createKeyButton(key: String): Button {
+        val button = Button(this)
+
         val weight = when (key) {
             "space" -> 4f
             "shift", "backspace" -> 2f
             else -> 1f
         }
 
+        button.layoutParams = LinearLayout.LayoutParams(0, 120, weight).apply {
+            setMargins(2, 2, 2, 2)
+        }
+
         val displayText = when (key) {
-            "shift" -> "⬆"
+            "shift" -> if (isShiftPressed) "⇧" else "⇧"
             "backspace" -> "⌫"
-            "space" -> "space"
+            "space" -> "Space"
             "enter" -> "↵"
             else -> if (isShiftPressed && key.length == 1) key.uppercase() else key
         }
 
-        val backgroundColor = when (key) {
-            "shift" -> if (isShiftPressed) 0xFF9C27B0.toInt() else 0xFF707070.toInt()
-            "backspace", "enter" -> 0xFF9C27B0.toInt()
-            "space" -> 0xFF707070.toInt()
-            "123", "ABC", "#+=" -> 0xFF707070.toInt()
-            else -> 0xFF808080.toInt()
-        }
+        button.text = displayText
+        button.setTextColor(Color.WHITE)
+        button.background = createKeyBackground(key)
+        button.setOnClickListener { handleKeyPress(key) }
 
-        return Button(this).apply {
-            text = displayText
-            setTextColor(Color.WHITE)
-            textSize = if (key == "space") 12f else 16f
-            typeface = android.graphics.Typeface.DEFAULT
-            background = createKeyBackground(backgroundColor)
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                weight
-            ).apply {
-                setMargins(dpToPx(2), dpToPx(2), dpToPx(2), dpToPx(2))
-            }
-            setOnClickListener { handleKeyPress(key) }
-        }
+        return button
     }
 
-    private fun createKeyBackground(color: Int): GradientDrawable {
+    private fun createKeyBackground(key: String): GradientDrawable {
+        val (baseColor, strokeColor) = when (key) {
+            "shift" -> Pair(
+                if (isShiftPressed) Color.parseColor("#8B5CF6") else Color.parseColor("#4B5563"),
+                Color.parseColor("#6B7280")
+            )
+            "backspace" -> Pair(Color.parseColor("#4B5563"), Color.parseColor("#6B7280"))
+            "enter" -> Pair(Color.parseColor("#8B5CF6"), Color.parseColor("#6B7280"))
+            "space" -> Pair(Color.parseColor("#4B5563"), Color.parseColor("#6B7280"))
+            "123", "ABC", "#+=" -> Pair(Color.parseColor("#4B5563"), Color.parseColor("#6B7280"))
+            else -> Pair(Color.parseColor("#374151"), Color.parseColor("#6B7280"))
+        }
+
         return GradientDrawable().apply {
-            setColor(color)
-            cornerRadius = dpToPx(8).toFloat()
-            setStroke(1, 0xFF606060.toInt())
+            cornerRadius = 8f
+            setColor(baseColor)
+            setStroke(1, strokeColor)
         }
-    }
-
-    private fun createAIButtonBackground(color: Int): StateListDrawable {
-        val stateListDrawable = StateListDrawable()
-
-        // Pressed state
-        val pressedDrawable = GradientDrawable().apply {
-            colors = intArrayOf(
-                adjustBrightness(color, 0.7f),
-                adjustBrightness(color, 0.5f)
-            )
-            orientation = GradientDrawable.Orientation.TOP_BOTTOM
-            cornerRadius = dpToPx(10).toFloat()
-        }
-
-        // Normal state
-        val normalDrawable = GradientDrawable().apply {
-            colors = intArrayOf(
-                adjustBrightness(color, 0.9f),
-                adjustBrightness(color, 0.7f)
-            )
-            orientation = GradientDrawable.Orientation.TOP_BOTTOM
-            cornerRadius = dpToPx(10).toFloat()
-        }
-
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), normalDrawable)
-
-        return stateListDrawable
-    }
-
-    private fun createGeminiButtonBackground(): StateListDrawable {
-        val stateListDrawable = StateListDrawable()
-
-        // Pressed state
-        val pressedDrawable = GradientDrawable().apply {
-            colors = intArrayOf(
-                Color.parseColor("#3367D6"),
-                Color.parseColor("#0F9D58"),
-                Color.parseColor("#F4B400"),
-                Color.parseColor("#DB4437")
-            )
-            orientation = GradientDrawable.Orientation.TL_BR
-            cornerRadius = dpToPx(10).toFloat()
-        }
-
-        // Normal state
-        val normalDrawable = GradientDrawable().apply {
-            colors = intArrayOf(
-                Color.parseColor("#4285F4"),
-                Color.parseColor("#34A853"),
-                Color.parseColor("#FBBC05"),
-                Color.parseColor("#EA4335")
-            )
-            orientation = GradientDrawable.Orientation.TL_BR
-            cornerRadius = dpToPx(10).toFloat()
-        }
-
-        stateListDrawable.addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
-        stateListDrawable.addState(intArrayOf(), normalDrawable)
-
-        return stateListDrawable
-    }
-
-    private fun createGradientDrawable(colors: IntArray, cornerRadius: Float): GradientDrawable {
-        return GradientDrawable().apply {
-            this.colors = colors
-            orientation = GradientDrawable.Orientation.TL_BR
-            this.cornerRadius = cornerRadius
-        }
-    }
-
-    private fun adjustBrightness(color: Int, factor: Float): Int {
-        val red = (Color.red(color) * factor).toInt().coerceIn(0, 255)
-        val green = (Color.green(color) * factor).toInt().coerceIn(0, 255)
-        val blue = (Color.blue(color) * factor).toInt().coerceIn(0, 255)
-        return Color.rgb(red, green, blue)
     }
 
     private fun handleKeyPress(key: String) {
-        // Add haptic feedback
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        vibrator.vibrate(50)
-
-        // Add sound feedback
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD)
-
         val inputConnection = currentInputConnection ?: return
 
         when (key) {
@@ -458,6 +373,7 @@ class CleverTypeIME : InputMethodService() {
                     key
                 }
                 inputConnection.commitText(textToInsert, 1)
+
                 if (isShiftPressed && key.length == 1) {
                     isShiftPressed = false
                     refreshKeyboard()
@@ -467,86 +383,40 @@ class CleverTypeIME : InputMethodService() {
     }
 
     private fun refreshKeyboard() {
-        val newView = createKeyboardView()
-        setInputView(newView)
-        keyboardView = newView
+        val parent = keyboardView.parent as? ViewGroup
+        parent?.removeView(keyboardView)
+        keyboardView = createKeyboardView()
+        parent?.addView(keyboardView)
+        setInputView(keyboardView)
     }
 
     private fun handleAIAction(action: String) {
         val inputConnection = currentInputConnection ?: return
 
-        // Get selected text or all text
-        val selectedText = inputConnection.getSelectedText(0)?.toString()
-        val textToProcess = if (!selectedText.isNullOrEmpty()) {
-            selectedText
-        } else {
-            inputConnection.getTextBeforeCursor(1000, 0)?.toString() ?: ""
-        }
+        val extractedText = inputConnection.getExtractedText(
+            android.view.inputmethod.ExtractedTextRequest(), 0
+        )
 
-        if (textToProcess.isEmpty()) {
-            // Add haptic feedback for error
-            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            vibrator.vibrate(longArrayOf(0, 100, 50, 100), -1)
+        val currentText = extractedText?.text?.toString() ?: ""
+
+        if (currentText.isEmpty()) {
             return
         }
 
-        // Add haptic feedback for processing
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        vibrator.vibrate(100)
-
-        // Process with AI in background
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val result = geminiService.performQuickAction(textToProcess, action)
+                val result = geminiService.performQuickAction(currentText, action)
 
-                // Update UI on main thread
                 Handler(Looper.getMainLooper()).post {
-                    // Replace text
-                    if (selectedText != null) {
-                        inputConnection.deleteSurroundingText(0, selectedText.length)
-                    } else {
-                        inputConnection.deleteSurroundingText(textToProcess.length, 0)
-                    }
+                    inputConnection.setSelection(0, currentText.length)
                     inputConnection.commitText(result, 1)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Error haptic feedback
-                Handler(Looper.getMainLooper()).post {
-                    val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                    vibrator.vibrate(longArrayOf(0, 200, 100, 200), -1)
-                }
             }
         }
     }
 
-    private fun dpToPx(dp: Int): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
-
-    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
-        super.onStartInputView(info, restarting)
-
-        // Reset keyboard state
-        isShiftPressed = false
-
-        // Adjust keyboard based on input type
-        when (info?.inputType?.and(EditorInfo.TYPE_MASK_CLASS)) {
-            EditorInfo.TYPE_CLASS_NUMBER -> {
-                isNumberMode = true
-            }
-            EditorInfo.TYPE_CLASS_PHONE -> {
-                isNumberMode = true
-            }
-            else -> {
-                isNumberMode = false
-            }
-        }
-
-        refreshKeyboard()
-    }
-
-    // Gemini Service for AI functionality (keeping your existing implementation)
     inner class GeminiService {
         private val apiKey = "AIzaSyBJWYILWfX4-Ya12zvcWQF1fHW14If6MoI"
 
@@ -560,6 +430,7 @@ class CleverTypeIME : InputMethodService() {
                         "translate" -> "Translate this text to English (if not English, otherwise to Spanish): \"$text\""
                         else -> "Improve and enhance this text: \"$text\""
                     }
+
                     makeGeminiRequest(prompt)
                 } catch (e: Exception) {
                     "Error: ${e.message}"

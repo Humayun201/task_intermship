@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class GeminiService {
-  // Your API key
   static const String _apiKey = 'AIzaSyBJWYILWfX4-Ya12zvcWQF1fHW14If6MoI';
 
   Future<Map<String, String>> rewriteText(String text, String tone) async {
@@ -28,7 +27,7 @@ class GeminiService {
 
   Future<String> _makeRequest(String text, String tone) async {
     try {
-      // Updated endpoint that should work
+
       final url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_apiKey';
 
       String prompt;
@@ -144,7 +143,6 @@ class GeminiService {
     }
   }
 
-  // Test method to verify API key works
   Future<bool> testApiKey() async {
     try {
       await _makeRequest('Hello', 'casual');

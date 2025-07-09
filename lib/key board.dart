@@ -20,7 +20,6 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
   bool _isShiftPressed = false;
   bool _isNumberMode = false;
 
-  // Keyboard layout
   List<List<String>> _keyboardLayout = [
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
@@ -38,7 +37,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 320, // Reduced height since we're using icon-only buttons
+      height: 320,
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.only(
@@ -55,17 +54,15 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
       ),
       child: Column(
         children: [
-          // Keyboard header
           _buildKeyboardHeader(),
 
           Divider(color: Colors.grey[800], height: 1),
 
-          // AI Actions Row (icon-only buttons)
           _buildIconOnlyAIActionsRow(),
 
           Divider(color: Colors.grey[800], height: 1),
 
-          // Main keyboard
+
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(8),
@@ -396,7 +393,6 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
         });
         break;
       case '#+=':
-      // Switch to symbols mode (can be implemented later)
         break;
       default:
         String textToInsert = _isShiftPressed && key.length == 1 ? key.toUpperCase() : key;
@@ -453,7 +449,6 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
     if (text.isNotEmpty) {
       widget.onAIAction(action, text);
     } else {
-      // Show message if no text
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please type some text first to use AI features'),
