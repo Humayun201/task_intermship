@@ -255,7 +255,7 @@ class _CustomKeyboardState extends State<CustomKeyboard> {
             ),
             SizedBox(width: 6),
             Text(
-              'Gemini',
+              'Ai',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,

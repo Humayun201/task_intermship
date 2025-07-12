@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:io';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -11,11 +13,126 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _hapticFeedback = false;
   String _defaultTone = 'Professional';
 
+  // Keyboard status variables
+  bool _keyboardEnabled = false;
+  bool _keyboardSelected = false;
+  bool _isCheckingStatus = false;
+
+  static const platform = MethodChannel('keyboard_settings');
+
+  @override
+  void initState() {
+    super.initState();
+    _checkKeyboardStatus();
+  }
+
+  // Check keyboard status using your existing method
+  Future<void> _checkKeyboardStatus() async {
+    if (!Platform.isAndroid) return;
+
+    setState(() {
+      _isCheckingStatus = true;
+    });
+
+    try {
+      final result = await platform.invokeMethod('checkKeyboardStatus');
+      setState(() {
+        _keyboardEnabled = result['enabled'] ?? false;
+        _keyboardSelected = result['selected'] ?? false;
+        _isCheckingStatus = false;
+      });
+    } catch (e) {
+      print('Error checking keyboard status: $e');
+      setState(() {
+        _isCheckingStatus = false;
+      });
+    }
+  }
+
+  // Open keyboard settings using your existing method
+  Future<void> _openKeyboardSettings() async {
+    if (!Platform.isAndroid) {
+      _showKeyboardSettingsDialog();
+      return;
+    }
+
+    try {
+      await platform.invokeMethod('openKeyboardSettings');
+      // Refresh status after opening settings
+      Future.delayed(Duration(seconds: 2), () {
+        _checkKeyboardStatus();
+      });
+    } catch (e) {
+      print('Error opening keyboard settings: $e');
+      _showErrorDialog('Could not open keyboard settings');
+    }
+  }
+
+  void _showKeyboardSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xFF0f3460),
+          title: Text(
+            'Keyboard Settings',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            Platform.isAndroid
+                ? 'Go to Settings > System > Languages & input > Virtual keyboard to change your keyboard.'
+                : 'Go to Settings > General > Keyboard to change your keyboard settings.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: TextStyle(color: Colors.purple),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Color(0xFF0f3460),
+          title: Text(
+            'Error',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'OK',
+                style: TextStyle(color: Colors.purple),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
+        backgroundColor: Color(0xFF1a1a2e),
+        foregroundColor: Colors.white,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -56,6 +173,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 activeColor: Colors.purple,
               ),
+            ),
+            SizedBox(height: 20),
+            _buildSectionHeader('Keyboard & Input'),
+            _buildSettingsTile(
+              'Enable Keyboard',
+              'Add CleverType to your keyboards',
+              Icons.keyboard_alt,
+              Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+              onTap: _openKeyboardSettings,
             ),
             SizedBox(height: 20),
             _buildSectionHeader('Preferences'),

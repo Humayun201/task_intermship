@@ -98,13 +98,13 @@ class CleverTypeIME : InputMethodService() {
         // AI Icon with gradient background
         val aiIconContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(6, 6, 6, 6)
+            setPadding(8, 8, 8, 8)
             background = GradientDrawable().apply {
                 colors = intArrayOf(
                     Color.parseColor("#8B5CF6"),
                     Color.parseColor("#3B82F6")
                 )
-                cornerRadius = 8f
+                cornerRadius = 12f
                 orientation = GradientDrawable.Orientation.TL_BR
             }
         }
@@ -112,7 +112,8 @@ class CleverTypeIME : InputMethodService() {
         val aiIcon = TextView(this).apply {
             text = "✨"
             setTextColor(Color.WHITE)
-            textSize = 16f
+            textSize = 18f
+            gravity = Gravity.CENTER
         }
         aiIconContainer.addView(aiIcon)
 
@@ -130,18 +131,29 @@ class CleverTypeIME : InputMethodService() {
             layoutParams = LinearLayout.LayoutParams(0, 0, 1f)
         }
 
-        // Close button
+        // Settings and Close buttons
+        val settingsButton = TextView(this).apply {
+            text = "⚙"
+            setTextColor(Color.WHITE)
+            textSize = 20f
+            setPadding(16, 0, 8, 0)
+            setOnClickListener {
+                // Open settings - you can implement this
+            }
+        }
+
         val closeButton = TextView(this).apply {
             text = "⌨"
             setTextColor(Color.WHITE)
             textSize = 20f
-            setPadding(16, 0, 0, 0)
+            setPadding(8, 0, 0, 0)
             setOnClickListener { requestHideSelf(0) }
         }
 
         headerLayout.addView(aiIconContainer)
         headerLayout.addView(titleText)
         headerLayout.addView(spacer)
+        headerLayout.addView(settingsButton)
         headerLayout.addView(closeButton)
 
         return headerLayout
@@ -153,36 +165,34 @@ class CleverTypeIME : InputMethodService() {
             setPadding(12, 8, 12, 8)
         }
 
-        // Grammar Check (spellcheck icon)
-        val grammarButton = createIconOnlyAIButton("✓", "grammar", Color.parseColor("#3B82F6"))
+        // Grammar Check - Professional text icon
+        val grammarButton = createProfessionalAIButton("Aa", "grammar", Color.parseColor("#3B82F6"))
         aiLayout.addView(grammarButton)
 
-        // Summarize (summarize icon)
-        val summarizeButton = createIconOnlyAIButton("∑", "summarize", Color.parseColor("#10B981"))
+        // Summarize - Document summary icon
+        val summarizeButton = createProfessionalAIButton("∑", "summarize", Color.parseColor("#10B981"))
         aiLayout.addView(summarizeButton)
 
-        // Expand (expand_more icon)
-        val expandButton = createIconOnlyAIButton("↔", "expand", Color.parseColor("#F59E0B"))
+        // Expand - Arrow expand icon
+        val expandButton = createProfessionalAIButton("↗", "expand", Color.parseColor("#F59E0B"))
         aiLayout.addView(expandButton)
 
-        // Translate (translate icon)
-        val translateButton = createIconOnlyAIButton("🌐", "translate", Color.parseColor("#EF4444"))
+        // Translate - Language/Globe icon
+        val translateButton = createProfessionalAIButton("文A", "translate", Color.parseColor("#EF4444"))
         aiLayout.addView(translateButton)
 
-        // Gemini AI (with text)
+        // Gemini AI - Modern AI button
         val geminiButton = createGeminiButton()
         aiLayout.addView(geminiButton)
 
         return aiLayout
     }
 
-    private fun createIconOnlyAIButton(icon: String, action: String, color: Int): Button {
-        return Button(this).apply {
-            text = icon
+    private fun createProfessionalAIButton(icon: String, action: String, color: Int): View {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
-            textSize = 20f
-            background = createGradientBackground(color)
+            background = createProfessionalGradientBackground(color)
             layoutParams = LinearLayout.LayoutParams(
                 0,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -192,51 +202,65 @@ class CleverTypeIME : InputMethodService() {
                 height = 120
             }
             setOnClickListener { handleAIAction(action) }
-            // Add shadow effect
-            setShadowLayer(4f, 0f, 2f, color)
+            elevation = 6f
+            clipToOutline = true
         }
+
+        // Icon
+        val iconView = TextView(this).apply {
+            text = icon
+            setTextColor(Color.WHITE)
+            textSize = 22f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+            setShadowLayer(2f, 0f, 1f, Color.BLACK)
+        }
+
+        container.addView(iconView)
+        return container
     }
 
     private fun createGeminiButton(): View {
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            background = createGradientBackground(Color.parseColor("#4285F4"))
+            background = createProfessionalGradientBackground(Color.parseColor("#4285F4"))
             layoutParams = LinearLayout.LayoutParams(
                 0,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                2f
+                1.5f
             ).apply {
                 setMargins(4, 0, 4, 0)
                 height = 120
             }
             setOnClickListener { handleAIAction("gemini") }
+            elevation = 6f
+            clipToOutline = true
         }
 
-        // Gemini icon with white background
+        // AI Sparkle icon
         val geminiIcon = TextView(this).apply {
             text = "✨"
-            setTextColor(Color.parseColor("#4285F4"))
-            textSize = 14f
+            setTextColor(Color.WHITE)
+            textSize = 16f
             gravity = Gravity.CENTER
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(Color.WHITE)
-                cornerRadius = 100f
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(4, 0, 2, 0)
             }
-            layoutParams = LinearLayout.LayoutParams(40, 40).apply {
-                setMargins(8, 0, 0, 0)
-            }
+            setShadowLayer(2f, 0f, 1f, Color.BLACK)
         }
 
-        // Gemini text
+        // AI text
         val geminiText = TextView(this).apply {
-            text = "Gemini"
+            text = "AI"
             setTextColor(Color.WHITE)
             textSize = 14f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setPadding(8, 0, 8, 0)
             gravity = Gravity.CENTER
+            setShadowLayer(2f, 0f, 1f, Color.BLACK)
         }
 
         container.addView(geminiIcon)
@@ -245,20 +269,31 @@ class CleverTypeIME : InputMethodService() {
         return container
     }
 
-    private fun createGradientBackground(baseColor: Int): GradientDrawable {
+    private fun createProfessionalGradientBackground(baseColor: Int): GradientDrawable {
         return GradientDrawable().apply {
+            // Create a professional gradient with subtle depth
             colors = intArrayOf(
-                baseColor,
+                // Lighter top
                 Color.argb(
-                    200,
-                    Color.red(baseColor),
-                    Color.green(baseColor),
-                    Color.blue(baseColor)
+                    255,
+                    Math.min(255, (Color.red(baseColor) * 1.2).toInt()),
+                    Math.min(255, (Color.green(baseColor) * 1.2).toInt()),
+                    Math.min(255, (Color.blue(baseColor) * 1.2).toInt())
+                ),
+                // Base color
+                baseColor,
+                // Darker bottom
+                Color.argb(
+                    255,
+                    (Color.red(baseColor) * 0.7).toInt(),
+                    (Color.green(baseColor) * 0.7).toInt(),
+                    (Color.blue(baseColor) * 0.7).toInt()
                 )
             )
-            cornerRadius = 10f
+            cornerRadius = 12f
             orientation = GradientDrawable.Orientation.TOP_BOTTOM
-            setStroke(1, Color.parseColor("#444444"))
+            // Professional border
+            setStroke(1, Color.argb(80, 255, 255, 255))
         }
     }
 
@@ -294,7 +329,6 @@ class CleverTypeIME : InputMethodService() {
 
     private fun createKeyButton(key: String): Button {
         val button = Button(this)
-
         val weight = when (key) {
             "space" -> 4f
             "shift", "backspace" -> 2f
@@ -373,7 +407,6 @@ class CleverTypeIME : InputMethodService() {
                     key
                 }
                 inputConnection.commitText(textToInsert, 1)
-
                 if (isShiftPressed && key.length == 1) {
                     isShiftPressed = false
                     refreshKeyboard()
@@ -392,11 +425,9 @@ class CleverTypeIME : InputMethodService() {
 
     private fun handleAIAction(action: String) {
         val inputConnection = currentInputConnection ?: return
-
         val extractedText = inputConnection.getExtractedText(
             android.view.inputmethod.ExtractedTextRequest(), 0
         )
-
         val currentText = extractedText?.text?.toString() ?: ""
 
         if (currentText.isEmpty()) {
@@ -406,7 +437,6 @@ class CleverTypeIME : InputMethodService() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val result = geminiService.performQuickAction(currentText, action)
-
                 Handler(Looper.getMainLooper()).post {
                     inputConnection.setSelection(0, currentText.length)
                     inputConnection.commitText(result, 1)
@@ -430,7 +460,6 @@ class CleverTypeIME : InputMethodService() {
                         "translate" -> "Translate this text to English (if not English, otherwise to Spanish): \"$text\""
                         else -> "Improve and enhance this text: \"$text\""
                     }
-
                     makeGeminiRequest(prompt)
                 } catch (e: Exception) {
                     "Error: ${e.message}"
@@ -441,7 +470,6 @@ class CleverTypeIME : InputMethodService() {
         private fun makeGeminiRequest(prompt: String): String {
             val url = URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey")
             val connection = url.openConnection() as HttpURLConnection
-
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json")
             connection.doOutput = true

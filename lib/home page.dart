@@ -14,8 +14,78 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showCustomKeyboard = false;
   bool _useCleverKeyboard = false;
   FocusNode _textFocusNode = FocusNode();
-  int _wordsRemaining = 102;
   String _selectedKeyboardType = 'System';
+
+  // Getters for UI text and configuration
+  String get appTitle => 'smart Ai';
+
+
+  String get keyboardSelectorTitle => 'Select Keyboard Type';
+
+  String get textFieldHint => 'Try $_selectedKeyboardType keyboard here!';
+
+  String get keyboardActiveText => '$_selectedKeyboardType Active';
+
+  // Getters for keyboard options
+  List<KeyboardOption> get keyboardOptions => [
+    KeyboardOption(
+      title: 'System Keyboard',
+      subtitle: 'Default system keyboard',
+      icon: Icons.keyboard,
+      color: Colors.blue,
+      type: 'System',
+    ),
+    KeyboardOption(
+      title: 'CleverType AI',
+      subtitle: 'AI-powered smart keyboard',
+      icon: Icons.smart_toy,
+      color: Colors.purple,
+      type: 'CleverType',
+    ),
+  ];
+
+  // Getters for menu items
+  List<MenuItem> get menuItems => [
+    MenuItem(
+      icon: Icons.settings,
+      title: 'Keyboard Settings',
+      subtitle: 'Auto Correct, Suggestions, Sound & Vibrations',
+    ),
+    MenuItem(
+      icon: Icons.psychology,
+      title: 'AI Settings',
+      subtitle: 'Custom Tones, Grammar Prompts and more',
+      badge: 'NEW',
+    ),
+    MenuItem(
+      icon: Icons.palette,
+      title: 'Keyboard Themes',
+      subtitle: 'Day Mode, Night mode, Pure Night mode',
+    ),
+    MenuItem(
+      icon: Icons.translate,
+      title: 'Keyboard Languages',
+      subtitle: '30+ Languages',
+    ),
+    MenuItem(
+      icon: Icons.share,
+      title: 'Share CleverType',
+      subtitle: 'Let your friends and family find us',
+    ),
+  ];
+
+  // Getters for styling
+  Color get primaryColor => Colors.purple;
+  Color get secondaryColor => Colors.blue;
+  Color get backgroundColor => Colors.white;
+  Color get cardBackgroundColor => Colors.grey[50]!;
+  Color get borderColor => Colors.grey[200]!;
+
+  // Getter for checking if custom keyboard should be shown
+  bool get shouldShowCustomKeyboard => _showCustomKeyboard && _useCleverKeyboard;
+
+  // Getter for checking if keyboard type indicator should be shown
+  bool get shouldShowKeyboardIndicator => _selectedKeyboardType != 'System';
 
   @override
   void initState() {
@@ -60,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: backgroundColor,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -84,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Select Keyboard Type',
+                    keyboardSelectorTitle,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -92,20 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  _buildKeyboardOption(
-                    'System Keyboard',
-                    'Default system keyboard',
-                    Icons.keyboard,
-                    Colors.blue,
-                    'System',
-                  ),
-                  _buildKeyboardOption(
-                    'CleverType AI',
-                    'AI-powered smart keyboard',
-                    Icons.smart_toy,
-                    Colors.purple,
-                    'CleverType',
-                  ),
+                  ...keyboardOptions.map((option) => _buildKeyboardOption(option)),
                 ],
               ),
             ),
@@ -115,22 +172,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildKeyboardOption(String title, String subtitle, IconData icon, Color color, String type, {bool isComingSoon = false}) {
-    bool isSelected = _selectedKeyboardType == type;
-
+  Widget _buildKeyboardOption(KeyboardOption option) {
+    bool isSelected = _selectedKeyboardType == option.type;
     return GestureDetector(
-      onTap: isComingSoon ? null : () {
+      onTap: () {
         setState(() {
-          _selectedKeyboardType = type;
-          _useCleverKeyboard = type == 'CleverType';
+          _selectedKeyboardType = option.type;
+          _useCleverKeyboard = option.type == 'CleverType';
           _showCustomKeyboard = false;
         });
         Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$title selected'),
-            backgroundColor: color,
+            content: Text('${option.title} selected'),
+            backgroundColor: option.color,
             duration: Duration(seconds: 2),
           ),
         );
@@ -139,10 +194,10 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.grey[50],
+          color: isSelected ? option.color.withOpacity(0.1) : cardBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? color : Colors.grey[200]!,
+            color: isSelected ? option.color : borderColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -151,49 +206,27 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isComingSoon ? Colors.grey[400] : color,
+                color: option.color,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
+              child: Icon(option.icon, color: Colors.white, size: 24),
             ),
             SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: isComingSoon ? Colors.grey[500] : Colors.black87,
-                        ),
-                      ),
-                      if (isComingSoon) ...[
-                        SizedBox(width: 8),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'SOON',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    option.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
                   SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    option.subtitle,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -203,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: color, size: 24),
+              Icon(Icons.check_circle, color: option.color, size: 24),
           ],
         ),
       ),
@@ -215,16 +248,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: backgroundColor,
           elevation: 0,
           title: Text(
-            'CleverType',
+            appTitle,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: Colors.purple,
+              color: primaryColor,
             ),
           ),
           actions: [
@@ -233,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: secondaryColor,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -256,81 +289,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Subscription Plan Card
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey[200]!),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Subscription Plan',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '$_wordsRemaining Words left',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: Icon(Icons.diamond, color: Colors.white, size: 18),
-                            label: Text(
-                              'Upgrade',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     SizedBox(height: 30),
-
                     // Settings Menu Items
-                    _buildMenuItem(Icons.settings, 'Keyboard Settings', 'Auto Correct, Suggestions, Sound & Vibrations'),
-                    _buildMenuItem(Icons.psychology, 'AI Settings', 'Custom Tones, Grammar Prompts and more', badge: 'NEW'),
-                    _buildMenuItem(Icons.palette, 'Keyboard Themes', 'Day Mode, Night mode, Pure Night mode'),
-                    _buildMenuItem(Icons.translate, 'Keyboard Languages', '30+ Languages'),
-                    _buildMenuItem(Icons.share, 'Share CleverType', 'Let your friends and family find us'),
+                    ...menuItems.map((item) => _buildMenuItem(item)),
                   ],
                 ),
               ),
             ),
-
             // Keyboard Test Area
             Container(
               width: double.infinity,
@@ -350,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: backgroundColor,
                             borderRadius: BorderRadius.circular(25),
                             border: Border.all(color: Colors.grey[300]!),
                           ),
@@ -359,14 +324,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             focusNode: _textFocusNode,
                             style: TextStyle(fontSize: 16, color: Colors.black87),
                             decoration: InputDecoration(
-                              hintText: 'Try $_selectedKeyboardType keyboard here!',
+                              hintText: textFieldHint,
                               hintStyle: TextStyle(color: Colors.grey[500]),
                               border: InputBorder.none,
                               isDense: true,
                             ),
                             readOnly: _useCleverKeyboard,
                             showCursor: true,
-                            cursorColor: Colors.purple,
+                            cursorColor: primaryColor,
                             onTap: () {
                               if (_useCleverKeyboard) {
                                 _showCleverKeyboard();
@@ -398,19 +363,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  if (_selectedKeyboardType != 'System') ...[
+                  if (shouldShowKeyboardIndicator) ...[
                     SizedBox(height: 12),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
+                        color: primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: Colors.purple.withOpacity(0.3)),
+                        border: Border.all(color: primaryColor.withOpacity(0.3)),
                       ),
                       child: Text(
-                        '$_selectedKeyboardType Active',
+                        keyboardActiveText,
                         style: TextStyle(
-                          color: Colors.purple,
+                          color: primaryColor,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -420,9 +385,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
             // Custom Keyboard
-            if (_showCustomKeyboard && _useCleverKeyboard)
+            if (shouldShowCustomKeyboard)
               CustomKeyboard(
                 textController: _textController,
                 onAIAction: (action, text) {
@@ -449,14 +413,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, String subtitle, {String? badge}) {
+  Widget _buildMenuItem(MenuItem item) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: cardBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
@@ -467,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.black87, size: 24),
+            child: Icon(item.icon, color: Colors.black87, size: 24),
           ),
           SizedBox(width: 16),
           Expanded(
@@ -477,23 +441,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     Text(
-                      title,
+                      item.title,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
-                    if (badge != null) ...[
+                    if (item.badge != null) ...[
                       SizedBox(width: 8),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.purple,
+                          color: primaryColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          badge,
+                          item.badge!,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 8,
@@ -506,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  item.subtitle,
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
@@ -517,4 +481,35 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+// Data classes for better organization
+class KeyboardOption {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final String type;
+
+  KeyboardOption({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.type,
+  });
+}
+
+class MenuItem {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? badge;
+
+  MenuItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.badge,
+  });
 }
